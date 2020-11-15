@@ -16,11 +16,9 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path
-from itest.views import index, detail
+from django.conf.urls import include
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-    url(r'^index/', index),
-    # url(r'^detail-(\d)-(\d)', detail),
-    url(r'^detail-(?P<uid>\d+)-(?P<pid>\d+)/', detail),
+    path('admin/', admin.site.urls),
+    path('chat/', include('chat.urls')),
 ]
