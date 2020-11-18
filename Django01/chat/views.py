@@ -8,7 +8,8 @@ def index(request):
     return render(request,'chat/index.html')
 
 
-def room(request,room_name):
+def room(request,room_name,user_name):
     return render(request, 'chat/room.html', {
-        'room_name': room_name
+        'room_name': room_name,
+        'userName': user_name,
     })

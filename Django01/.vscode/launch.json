@@ -4,13 +4,16 @@
   // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
-  {"name":"Python: Django","type":"python","request":"launch","program":"${workspaceFolder}\\Django01\\manage.py","args":["runserver"],"django":true},
     {
-      "name": "Python: 当前文件",
+      "name": "Python: Django",
       "type": "python",
       "request": "launch",
-      "program": "${file}",
-      "console": "integratedTerminal"
+      "program": "${workspaceFolder}\\manage.py",
+      "args": [
+        "runserver"
+      ],
+      "django": true,
+      "justMyCode": false
     }
   ]
 }

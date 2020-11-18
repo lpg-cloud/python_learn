@@ -13,18 +13,18 @@
     {{ room_name|json_script:"room-name" }}
     <script>
         const roomName = JSON.parse(document.getElementById('room-name').textContent);
-
+        const userName = '{{userName}}';
         const chatSocket = new WebSocket(
             'ws://'
             + window.location.host
-            + '/ws/chat/'
+            +'/ws/chat/'
             + roomName
-            + '/'
+            + '/'+userName+'/'
         );
 
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
-            document.querySelector('#chat-log').value += (data.message + '\n');
+            document.querySelector('#chat-log').value += (data.sender+'：'+ data.message + '\n');
         };
 
         chatSocket.onclose = function(e) {
@@ -42,6 +42,8 @@
             const messageInputDom = document.querySelector('#chat-message-input');
             const message = messageInputDom.value;
             chatSocket.send(JSON.stringify({
+                'message_type': 'user_to_group_message',
+                'receiver':roomName,
                 'message': message
             }));
             messageInputDom.value = '';
