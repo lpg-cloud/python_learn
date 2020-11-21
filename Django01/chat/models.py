@@ -6,7 +6,24 @@ from django.db.models.base import Model
 
 class user(models.Model):
   name=models.CharField(max_length=20)
+  gender_choise=[('F','男'),('M','女')]
+  gender=models.CharField(max_length='2',choices=gender_choise,default='F')
+  tel_number=models.CharField(max_length=11)
+  address=models.CharField(max_length=50)
+  icon=models.BinaryField()
 
 class clients(models.Model):
   channel_name=models.CharField(max_length=40)
-  user_name=models.CharField(max_length=20)
+  user_name=models.OneToOneField(on_delete=models.CASCADE)
+  login_time=models.DateTimeField('date login')
+
+class group(models.Model):
+  name=models.CharField(max_length=20)
+  
+
+class user_group(models.Model):
+  user_id=models.OneToOneField(user.id, on_delete=models.CASCADE)
+  group_id=models.OneToOneField(group, on_delete=models.CASCADE)
+  is_owner=models.models.BooleanField()
+  is_manager=models.models.BooleanField()
+
