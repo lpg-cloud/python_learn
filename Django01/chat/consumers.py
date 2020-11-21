@@ -62,16 +62,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
     room_name = ''
     user_id = ''
 
-    @sync_to_async
     async def connect(self):
 
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.user_id = self.scope['url_route']['kwargs']['user_name']
-        cur_user = user.objects.filter(id=int(self.user_id))
+        cur_user =await sync_to_async(user.objects.filter)(id=int(self.user_id))
 
         print(self.user_id)
         print(self.room_name)
-        clients.objects.create(user_name=cur_user,channel_name=self.channel_name,login_time=timezone.now())
+        await sync_to_async(clients.objects.create)(user_name=cur_user.id,channel_name=self.channel_name,login_time=timezone.now())
         self.all_online_user_group='all_online_users'
         # Join room group
         
