@@ -1,35 +1,35 @@
 
 # chat/consumers.py
-from pytz import unicode
-
-from chat.models import clients, models
+from .models import user
+from .models import clients, models
 from channels.layers import get_channel_layer
 from Django01.settings import CHANNEL_LAYERS
 import json
 import channels
 from channels.generic.websocket import AsyncWebsocketConsumer
-from asgiref.sync import async_to_sync
-
-import redis
-
-pool = redis.ConnectionPool(host='localhost', port=6379, decode_responses=True)
+from asgiref.sync import sync_to_async
+from django.utils import timezone
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
     room_name = ''
     user_id = ''
-    r = redis.Redis(host='localhost', port=6379, decode_responses=True)
     async def connect(self):
 
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.user_id = self.scope['url_route']['kwargs']['user_name']
-        # 将用户名和用户当前连接名存到redis中的
-        self.r.hset('online_users', self.user_id, self.channel_name)
+        cur_user =await sync_to_async(user.objects.filter)(id=int(self.user_id))
+
+        print(self.user_id)
+        print(self.room_name)
+        await sync_to_async(clients.objects.create)(user_name=cur_user.id,channel_name=self.channel_name,login_time=timezone.now())
+        self.all_online_user_group='all_online_users'
         # Join room group
-        await self.channel_layer.group_add(
-            self.room_name,
-            self.channel_name
-        )
+        
+        # await self.channel_layer.group_add(
+        #     self.room_name,
+        #     self.channel_name
+        # )
         await self.accept()
 
     async def disconnect(self, close_code):
