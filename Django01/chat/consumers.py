@@ -1,52 +1,7 @@
-# # chat/consumers.py
-# import json
-# from asgiref.sync import async_to_sync
-# from channels.generic.websocket import WebsocketConsumer
-#
-# class ChatConsumer(WebsocketConsumer):
-#     def connect(self):
-#         self.room_name = self.scope['url_route']['kwargs']['room_name']
-#         self.room_group_name = 'chat_%s' % self.room_name
-#
-#         # Join room group
-#         async_to_sync(self.channel_layer.group_add)(
-#             self.room_group_name,
-#             self.channel_name
-#         )
-#
-#         self.accept()
-#
-#     def disconnect(self, close_code):
-#         # Leave room group
-#         async_to_sync(self.channel_layer.group_discard)(
-#             self.room_group_name,
-#             self.channel_name
-#         )
-#
-#     # Receive message from WebSocket
-#     def receive(self, text_data):
-#         text_data_json = json.loads(text_data)
-#         message = text_data_json['message']
-#
-#         # Send message to room group
-#         async_to_sync(self.channel_layer.group_send)(
-#             self.room_group_name,
-#             {
-#                 'type': 'chat_message',
-#                 'message': message
-#             }
-#         )
-#
-#     # Receive message from room group
-#     def chat_message(self, event):
-#         message = event['message']
-#
-#         # Send message to WebSocket
-#         self.send(text_data=json.dumps({
-#             'message': message
-#         }))
 
 # chat/consumers.py
+from pytz import unicode
+
 from chat.models import clients, models
 from channels.layers import get_channel_layer
 from Django01.settings import CHANNEL_LAYERS
@@ -55,21 +10,22 @@ import channels
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import async_to_sync
 
+import redis
+
+pool = redis.ConnectionPool(host='localhost', port=6379, decode_responses=True)
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
     room_name = ''
     user_id = ''
-    @async_to_sync
+    r = redis.Redis(host='localhost', port=6379, decode_responses=True)
     async def connect(self):
 
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.user_id = self.scope['url_route']['kwargs']['user_name']
-        
-        models.clients.objects.create(name=self.user_id,channel_name=self.channel_name)
-        self.all_online_user_group='all_online_users'
+        # 将用户名和用户当前连接名存到redis中的
+        self.r.hset('online_users', self.user_id, self.channel_name)
         # Join room group
-        
         await self.channel_layer.group_add(
             self.room_name,
             self.channel_name
@@ -77,6 +33,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
+
+        self.r.hdel('online_users',(self.user_id,))
         # Leave room group
         await self.channel_layer.group_discard(
             self.room_name,
@@ -84,6 +42,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     # Receive message from WebSocket
+
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
@@ -101,10 +60,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 }
             )
         else:
-            user_id = text_data_json['receiver']
-            print(self.channel_name)
-            print(user_id)
-            await self.channel_layer.send(user_id, {
+            receiver_id = text_data_json['receiver']
+            receiver_channel_name = self.r.hget('online_users', receiver_id)
+            await self.channel_layer.send(receiver_channel_name, {
                 'type': 'chat_message',
                 'sender': self.user_id,
                 'message': message
