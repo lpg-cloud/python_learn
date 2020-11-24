@@ -6,7 +6,12 @@ from django.db.models.base import Model
 # Create your models here.
 
 class user(models.Model):
-    name = models.CharField(max_length=20)
+    name=models.CharField(max_length=20)
+    gender_choise=[('F','男'),('M','女')]
+    gender=models.CharField(max_length=2,choices=gender_choise,default='F')
+    tel_number=models.CharField(max_length=11)
+    address=models.CharField(max_length=50)
+    icon=models.BinaryField()
 
 #用来存储用户登录时和服务器建立的连接的channels_name
 class client(models.Model):
