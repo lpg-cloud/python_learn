@@ -43,23 +43,27 @@ print('父进程结束')
 #
 #
 # class MyThread(threading.Thread):
-#
+#     '''
+#     mp = MyThread(name='我的线程', args=('第一个参数', "第二个参数"))
+
+#     mp.start()
+#     '''
 #     def __init__(self, name, args):
 #         super().__init__(name=name)  # 将name传给父类对象的init方法
 #         self.args = args
-#
+
 #     def run(self) -> None:
 #         print('子线程开始 %s' % threading.current_thread().getName())
 #         print('执行了run中的各种代码!!!')
 #         print('arg1= %s ,arg2 = %s' % (self.args[0], self.args[1]))
-#
+
 #         time.sleep(5)
-#
+
 #         print('子进程结束!!!')
-#
-#
+
+
 # mp = MyThread(name='我的线程', args=('第一个参数', "第二个参数"))
-#
+
 # mp.start()
 
 
@@ -88,3 +92,17 @@ daemon：是否开启线程守护 其实是传给
 #     pp.close()
 #     pp.join()
 #     print('主进程结束了')
+
+
+class lpg(threading.Thread):
+    '''
+    mp = MyThread(name='我的线程', args=('第一个参数', '第二个参数'))
+    mp.start()
+    '''
+    def __init__(self, name, args):
+        super().__init__(name=name)  # 将name传给父类对象的init方法
+        self.args = args
+        
+    def run(self,*args,**kwargs):
+        
+        pass
